@@ -1,41 +1,46 @@
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
+import React from 'react';
 import { Link } from 'react-router-dom';
+import gql from 'graphql-tag';
+import { Query } from 'react-apollo';
 
 import Comment from './Comment';
 
-class Home extends Component {
-  async componentDidMount() {
-    const response = await fetch('/api/items');
-    const items = await response.json();
-    this.props.onItemsFetched(items);
+const GET_ITEMS = gql`
+  query GetItems {
+    items {
+      id
+      name
+      comments {
+        id
+        content
+        numberOfStars
+      }
+    }
   }
+`;
 
-  render() {
-    return (
-      <ul>
-        {this.props.items.map(item => (
-          <li key={item.id}>
-            <Link to={`/items/${item.id}`}>{item.name}</Link>
-            <Comment
-              id={item.comments[0].id}
-              content={item.comments[0].content}
-              numberOfStars={item.comments[0].numberOfStars}
-              onStarAddedToCommentOnServer={this.props.onStarAddedToCommentOnServer(
-                item.id
-              )}
-            />
-          </li>
-        ))}
-      </ul>
-    );
-  }
-}
+const Home = () => (
+  <Query query={GET_ITEMS}>
+    {({ loading, error, data }) => {
+      if (loading) return 'Loading...';
+      if (error) return `Error! ${error.message}`;
 
-Home.propTypes = {
-  items: PropTypes.array.isRequired,
-  onItemsFetched: PropTypes.func.isRequired,
-  onStarAddedToCommentOnServer: PropTypes.func.isRequired,
-};
+      return (
+        <ul>
+          {data.items.map(item => (
+            <li key={item.id}>
+              <Link to={`/items/${item.id}`}>{item.name}</Link>
+              <Comment
+                id={item.comments[0].id}
+                content={item.comments[0].content}
+                numberOfStars={item.comments[0].numberOfStars}
+              />
+            </li>
+          ))}
+        </ul>
+      );
+    }}
+  </Query>
+);
 
 export default Home;
