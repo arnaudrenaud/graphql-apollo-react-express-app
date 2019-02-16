@@ -1,57 +1,57 @@
-import React, { Component, Fragment } from 'react';
+import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
+import gql from 'graphql-tag';
+import { Query } from 'react-apollo';
 
 import Comment from './Comment';
 
-class ItemDetail extends Component {
-  async componentDidMount() {
-    const { id, onItemFetched } = this.props;
-
-    const response = await fetch(`/api/items/${id}`);
-    const item = await response.json();
-    onItemFetched(item);
-  }
-
-  render() {
-    const { item } = this.props;
-
-    if (!item) {
-      return null;
+const GET_ITEM = gql`
+  query GetItem($id: ID!) {
+    item(id: $id) {
+      id
+      name
+      description
+      comments {
+        id
+        content
+        numberOfStars
+      }
     }
-
-    return (
-      <Fragment>
-        <h1>{item.name}</h1>
-        <p>{item.description}</p>
-        <ol>
-          {item.comments &&
-            item.comments.map(({ id, content, numberOfStars }) => (
-              <li key={id}>
-                <Comment
-                  id={id}
-                  content={content}
-                  numberOfStars={numberOfStars}
-                  onStarAddedToCommentOnServer={
-                    this.props.onStarAddedToCommentOnServer
-                  }
-                />
-              </li>
-            ))}
-        </ol>
-      </Fragment>
-    );
   }
-}
+`;
+
+const ItemDetail = ({ id }) => (
+  <Query query={GET_ITEM} variables={{ id }}>
+    {({ loading, error, data }) => {
+      if (loading) return 'Loading...';
+      if (error) return `Error! ${error.message}`;
+
+      const { item } = data;
+
+      return (
+        <Fragment>
+          <h1>{item.name}</h1>
+          <p>{item.description}</p>
+          <ol>
+            {item.comments &&
+              item.comments.map(({ id: commentId, content, numberOfStars }) => (
+                <li key={commentId}>
+                  <Comment
+                    id={commentId}
+                    content={content}
+                    numberOfStars={numberOfStars}
+                  />
+                </li>
+              ))}
+          </ol>
+        </Fragment>
+      );
+    }}
+  </Query>
+);
 
 ItemDetail.propTypes = {
   id: PropTypes.string.isRequired,
-  item: PropTypes.object,
-  onItemFetched: PropTypes.func.isRequired,
-  onStarAddedToCommentOnServer: PropTypes.func.isRequired,
-};
-
-ItemDetail.defaultProps = {
-  item: null,
 };
 
 export default ItemDetail;
