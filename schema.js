@@ -1,10 +1,6 @@
 import { gql } from 'apollo-server-express';
 
-import {
-  getAllItemsWithTopComment,
-  getItemDetailsWithTopThreeComments,
-  getTopCommentsForItem,
-} from './dbRequests';
+import { getItems, getItem, getTopCommentsForItem } from './dbRequests';
 
 export const typeDefs = gql`
   type Query {
@@ -28,31 +24,11 @@ export const typeDefs = gql`
 
 export const resolvers = {
   Query: {
-    async items() {
-      const rows = await getAllItemsWithTopComment();
-
-      return rows.map(item => ({
-        ...item,
-      }));
-    },
-
-    async item(obj, { id }) {
-      const rows = await getItemDetailsWithTopThreeComments(id);
-
-      if (!rows.length) {
-        return {};
-      }
-      return {
-        id: rows[0].id,
-        name: rows[0].name,
-        description: rows[0].description,
-      };
-    },
+    items: () => getItems(),
+    item: (obj, { id }) => getItem(id),
   },
 
   Item: {
-    comments(obj, { top }) {
-      return getTopCommentsForItem(obj.id, top);
-    },
+    comments: (obj, { top }) => getTopCommentsForItem(obj.id, top),
   },
 };
