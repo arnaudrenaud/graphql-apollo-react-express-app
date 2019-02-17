@@ -1,11 +1,17 @@
 import { gql } from 'apollo-server-express';
 
-import { getItems, getItem, getTopCommentsForItem } from './dbRequests';
+import {
+  getItems,
+  getItem,
+  getTopCommentsForItem,
+  addStarToComment,
+} from './dbRequests';
 
 export const typeDefs = gql`
   type Query {
     items: [Item]
     item(id: ID!): Item
+    mutation: Mutation
   }
 
   type Item {
@@ -20,6 +26,10 @@ export const typeDefs = gql`
     content: String
     numberOfStars: Int
   }
+
+  type Mutation {
+    addStarToComment(id: ID!): Comment
+  }
 `;
 
 export const resolvers = {
@@ -30,5 +40,9 @@ export const resolvers = {
 
   Item: {
     comments: (obj, { top }) => getTopCommentsForItem(obj.id, top),
+  },
+
+  Mutation: {
+    addStarToComment: (obj, { id }) => addStarToComment(id),
   },
 };

@@ -14,7 +14,9 @@ ORDER BY numberOfStars DESC
 LIMIT ${numberOfTopComments}
 `);
 
-export const incrementNumberOfStarsForComment = id =>
-  db.run(
+export const addStarToComment = async id => {
+  await db.run(
     `UPDATE Comment SET numberOfStars = numberOfStars + 1 WHERE id = ${id}`
   );
+  return db.get(`SELECT * FROM Comment WHERE id = ${id}`);
+};

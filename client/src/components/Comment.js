@@ -1,45 +1,42 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { TiStarFullOutline } from 'react-icons/ti';
 import { FiChevronUp } from 'react-icons/fi';
+import gql from 'graphql-tag';
+import { Mutation } from 'react-apollo';
 
-class Comment extends Component {
-  addStarToCommentOnServer = async () => {
-    const { id, onStarAddedToCommentOnServer } = this.props;
-
-    const response = await fetch(
-      `/api/comments/${id}?field=numberOfStars&operation=increment`,
-      {
-        method: 'PATCH',
-      }
-    );
-    if (!response.ok) {
-      throw Error(response.statusText);
+const ADD_STAR_TO_COMMENT = gql`
+  mutation AddStarToComment($id: ID!) {
+    addStarToComment(id: $id) {
+      id
+      numberOfStars
     }
-    onStarAddedToCommentOnServer(id);
-  };
-
-  render() {
-    const { content, numberOfStars } = this.props;
-
-    return (
-      <blockquote>
-        <p>{`"${content}"`}</p>
-        <TiStarFullOutline />
-        {` ${numberOfStars} `}
-        <FiChevronUp
-          style={{ cursor: 'pointer' }}
-          onClick={this.addStarToCommentOnServer}
-        />
-      </blockquote>
-    );
   }
-}
+`;
+
+const Comment = ({ id, content, numberOfStars }) => (
+  <Mutation mutation={ADD_STAR_TO_COMMENT} variables={{ id }}>
+    {(addStarToComment, { loading, error }) => {
+      if (error) return `Error! ${error.message}`;
+
+      return (
+        <blockquote>
+          <p>{`"${content}"`}</p>
+          <TiStarFullOutline />
+          {` ${numberOfStars} `}
+          <FiChevronUp
+            style={{ cursor: loading ? 'not-allowed' : 'pointer' }}
+            onClick={loading ? () => {} : addStarToComment}
+          />
+        </blockquote>
+      );
+    }}
+  </Mutation>
+);
 
 Comment.propTypes = {
   id: PropTypes.string.isRequired,
   content: PropTypes.string.isRequired,
-  onStarAddedToCommentOnServer: PropTypes.func.isRequired,
   numberOfStars: PropTypes.number.isRequired,
 };
 
