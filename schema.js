@@ -3,6 +3,7 @@ import { gql } from 'apollo-server-express';
 import {
   getAllItemsWithTopComment,
   getItemDetailsWithTopThreeComments,
+  getTopCommentsForItem,
 } from './dbRequests';
 
 export const typeDefs = gql`
@@ -15,7 +16,7 @@ export const typeDefs = gql`
     id: ID
     name: String
     description: String
-    comments: [Comment]
+    comments(top: Int!): [Comment]
   }
 
   type Comment {
@@ -32,13 +33,6 @@ export const resolvers = {
 
       return rows.map(item => ({
         ...item,
-        comments: [
-          {
-            id: item.commentId,
-            content: item.commentContent,
-            numberOfStars: item.commentNumberOfStars,
-          },
-        ],
       }));
     },
 
@@ -52,12 +46,13 @@ export const resolvers = {
         id: rows[0].id,
         name: rows[0].name,
         description: rows[0].description,
-        comments: rows.map(row => ({
-          id: row.commentId,
-          content: row.commentContent,
-          numberOfStars: row.commentNumberOfStars,
-        })),
       };
+    },
+  },
+
+  Item: {
+    comments(obj, { top }) {
+      return getTopCommentsForItem(obj.id, top);
     },
   },
 };

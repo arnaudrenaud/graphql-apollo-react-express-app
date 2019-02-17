@@ -10,7 +10,7 @@ const GET_ITEMS = gql`
     items {
       id
       name
-      comments {
+      comments(top: 1) {
         id
         content
         numberOfStars

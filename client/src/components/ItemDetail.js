@@ -11,7 +11,7 @@ const GET_ITEM = gql`
       id
       name
       description
-      comments {
+      comments(top: 3) {
         id
         content
         numberOfStars
