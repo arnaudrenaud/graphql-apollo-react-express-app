@@ -6,12 +6,14 @@ import {
   getTopCommentsForItem,
   addStarToComment,
 } from './dbRequests';
+import { getTemperature } from './externalServices';
 
 export const typeDefs = gql`
   type Query {
     items: [Item]
     item(id: ID!): Item
     mutation: Mutation
+    temperature: Int
   }
 
   type Item {
@@ -36,6 +38,7 @@ export const resolvers = {
   Query: {
     items: () => getItems(),
     item: (obj, { id }) => getItem(id),
+    temperature: () => getTemperature(),
   },
 
   Item: {

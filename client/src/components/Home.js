@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import { Link } from 'react-router-dom';
 import gql from 'graphql-tag';
 import { Query } from 'react-apollo';
@@ -7,6 +7,7 @@ import Comment from './Comment';
 
 const GET_ITEMS = gql`
   query GetItems {
+    temperature
     items {
       id
       name
@@ -26,18 +27,21 @@ const Home = () => (
       if (error) return `Error! ${error.message}`;
 
       return (
-        <ul>
-          {data.items.map(item => (
-            <li key={item.id}>
-              <Link to={`/items/${item.id}`}>{item.name}</Link>
-              <Comment
-                id={item.comments[0].id}
-                content={item.comments[0].content}
-                numberOfStars={item.comments[0].numberOfStars}
-              />
-            </li>
-          ))}
-        </ul>
+        <Fragment>
+          <aside>{`Current temperature: ${data.temperature}°`}</aside>
+          <ul>
+            {data.items.map(item => (
+              <li key={item.id}>
+                <Link to={`/items/${item.id}`}>{item.name}</Link>
+                <Comment
+                  id={item.comments[0].id}
+                  content={item.comments[0].content}
+                  numberOfStars={item.comments[0].numberOfStars}
+                />
+              </li>
+            ))}
+          </ul>
+        </Fragment>
       );
     }}
   </Query>
