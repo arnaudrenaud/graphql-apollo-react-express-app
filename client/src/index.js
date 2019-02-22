@@ -1,4 +1,4 @@
-import ApolloClient from 'apollo-boost';
+import ApolloClient, { InMemoryCache } from 'apollo-boost';
 import React from 'react';
 import { ApolloProvider } from 'react-apollo';
 import ReactDOM from 'react-dom';
@@ -8,7 +8,11 @@ import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 
-const client = new ApolloClient();
+const client = new ApolloClient({
+  cache: new InMemoryCache({
+    dataIdFromObject: object => object.id,
+  }),
+});
 
 ReactDOM.render(
   <ApolloProvider client={client}>

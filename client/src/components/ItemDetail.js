@@ -20,10 +20,24 @@ const GET_ITEM = gql`
   }
 `;
 
+const getItemFragment = (id, client) => {
+  return client.readFragment({
+    id,
+    fragment: gql`
+      fragment itemName on Item {
+        name
+      }
+    `,
+  });
+};
+
 const ItemDetail = ({ id }) => (
   <Query query={GET_ITEM} variables={{ id }}>
-    {({ loading, error, data }) => {
-      if (loading) return 'Loading...';
+    {({ loading, error, data, client }) => {
+      const itemFragment = getItemFragment(id, client);
+      if (loading) {
+        return itemFragment ? 'Loading...' : <h1>{itemFragment.name}</h1>;
+      }
       if (error) return `Error! ${error.message}`;
 
       const { item } = data;
